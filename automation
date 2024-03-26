@@ -1,0 +1,45 @@
+pipeline {
+    agent any
+    
+    parameters {
+        string(name: 'GIT_URL', defaultValue: 'https://github.com/myuser/myrepo.git', description: 'URL of the Git repository')
+        string(name: 'BRANCH', defaultValue: 'main', description: 'Branch to build')
+        booleanParam(name: 'RUN_TESTS', defaultValue: true, description: 'Run tests?')
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'qa', 'prod'], description: 'Select target environment')
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    // Checkout the specified branch from the Git repository
+                    checkout([$class: 'GitSCM', branches: [[name: params.BRANCH]], userRemoteConfigs: [[url: params.GIT_URL]]])
+                }
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                // Your build steps here
+                echo 'Building the project...'
+            }
+        }
+        
+        stage('Test') {
+            when {
+                expression { params.RUN_TESTS == true }
+            }
+            steps {
+                // Your test steps here
+                echo 'Running tests...'
+            }
+        }
+        
+        stage('Deploy') {
+            steps {
+                // Your deployment steps here
+                echo 'Deploying to ' + params.ENVIRONMENT + ' environment...'
+            }
+        }
+    }
+}
